@@ -1,4 +1,10 @@
 .venv/
 data/*
 !data/.gitkeep
+!data/audio/
+!data/audio/.gitkeep
+!data/meta/
+!data/meta/.gitkeep
+data/audio/*
+data/meta/*
 test.py
