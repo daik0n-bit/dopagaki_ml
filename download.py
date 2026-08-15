@@ -1,6 +1,5 @@
 import yt_dlp
 import imageio_ffmpeg
-import spotdl
 
 class MyLogger:
     def __init__(self):
