@@ -4,7 +4,7 @@ driver = webdriver.Chrome()
 
 def load_failed_ids():
     FAILED_IDS = []
-    with open('data/failed_urls.txt', encoding='utf-8') as f:
+    with open('data/meta/failed_urls.txt', encoding='utf-8') as f:
         for line in f:
             if line.strip() == '' or line.startswith('#'):
                 continue
@@ -26,7 +26,7 @@ def is_redirect(failed_id):
 for failed_id in load_failed_ids():
     redirected, new_id = is_redirect(failed_id)
     if redirected == True:
-        with open('data/urls.txt', 'a', encoding='utf-8') as f:
+        with open('data/meta/urls.txt', 'a', encoding='utf-8') as f:
                     print(f"書き込み中: {new_id}")
                     f.write(f"https://music.youtube.com/watch?v={new_id}" + '\n')
     else:
