@@ -1,20 +1,39 @@
 import yt_dlp
 import imageio_ffmpeg
+import spotdl
+
+class MyLogger:
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        print(f"チェック中: {msg}")
+        if "[youtube]" not in msg:
+            return
+        video_id = msg.split(":")[1].split(" ")[2]
+        with open('data/failed_urls.txt', 'a', encoding='utf-8') as f:
+            f.write(video_id + '\n')
 
 def download_audio(urls):
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': f'data/%(uploader)s_%(title)s.%(ext)s',
         'ffmpeg_location': imageio_ffmpeg.get_ffmpeg_exe(),
-        # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
+        'logger': MyLogger(),
+        'ignoreerrors': True,
+        'sleep_interval': 3,   # 最低3秒待つ
+        'max_sleep_interval': 8,  # 最大8秒待つ（ランダムでこの間の秒数になる）
+        'download_archive': 'data/downloaded.txt',
         'postprocessors': [{
-            # Extract audio using ffmpeg
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav',
         }],
         'extractor_args': {
             'youtube': {
-                'player_client': ['mweb', 'ios', 'android']
+                'player_client': ['web', 'mweb', 'ios', 'android']
             }
         },
     }
@@ -22,18 +41,15 @@ def download_audio(urls):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         error_code = ydl.download(urls)
 
-# ダウンロード
-URLS = [
-    'https://music.youtube.com/watch?v=dY5Vkuo-QRo&si=53cG3QYVVlp96CLf',
-    'https://music.youtube.com/watch?v=FDMpW6a8jq4&si=2pqAgyNp-CumWrq5',
-    'https://music.youtube.com/watch?v=0T-BCIFeqq8&si=GLrjqizYaPDYQtb4',
-    'https://music.youtube.com/watch?v=GieQq3eWSnE&si=zQJvqFSdkYl128y0',
-    'https://music.youtube.com/watch?v=4tlUwgtgdZA&si=D3YA8r149VCircHy',
-    'https://music.youtube.com/watch?v=m9SMT5ipbxk&si=lsq3rRzh6eDKDdKw',
-    'https://music.youtube.com/watch?v=9mWbCPJuoIo&si=Q7qGC6Rr2tIHePrJ',
-    'https://music.youtube.com/watch?v=DO_aopUeFnw&si=XCQjDBSHFNTX-yb1',
-    'https://music.youtube.com/watch?v=hXyuJ4BDXeA&si=h_HKr6XM_-uIxl92',
-    'https://music.youtube.com/watch?v=wggigwtz4dQ&si=te3_cAwev_8_3G-D'
-]
+def load_urls():
+    URLS = []
+    with open('data/urls.txt', encoding='utf-8') as f:
+        for line in f:
+            if line.strip() == '' or line.startswith('#'):
+                continue
+            URLS.append(line.strip())
+    return URLS
 
-download_audio(URLS)
+# ダウンロード
+
+download_audio(load_urls())
